@@ -30,8 +30,25 @@ export function LandmarksPage() {
 
   const handleShow = (landmark) => {
     console.log("handleShow", landmark);
-    setIsPhotosShowVisible(true);
+    setIsLandmarksShowVisible(true);
     setCurrentLandmark(landmark);
+  };
+
+  const handleUpdate = (landmark, params, successCallback) => {
+    console.log("handleUpdate");
+    axios.patch(`api/v1/landmarks/${landmark.id}`, params).then((response)=> {
+      setLandmarks(landmarks.map(l => l.id === response.data.id ? response.data : l));
+      successCallback();
+      setIsLandmarksShowVisible(false);
+    });
+  };
+
+  const handleDestroy = (landmark) => {
+    console.log("handleDestroy", landmark);
+    axios.delete(`api/v1/landmarks/${landmark.id}`).then((response) => {
+      setLandmarks(landmarks.filter((l)=> l.id !== landmark.id));
+      setIsLandmarksShowVisible(false);
+    });
   };
 
   useEffect(handleIndex,[]);
@@ -41,7 +58,7 @@ export function LandmarksPage() {
       <LandmarksNew onCreate={handleCreate} />
       <LandmarksIndex landmarks={landmarks} onShow={handleShow}/>
       <Modal show={isLandmarksShowVisible} onClose={() => setIsLandmarksShowVisible(false)}>
-        <LandmarksShow landmark={currentLandmark} />  
+        <LandmarksShow landmark={currentLandmark} onUpdate={handleUpdate} onDestroy={handleDestroy} />  
       </Modal>
     </main>
   );
